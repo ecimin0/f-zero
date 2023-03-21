@@ -1,0 +1,34 @@
+ObjC.import("IOKit");
+ObjC.import("CoreServices");
+
+
+(() => {
+    var ioConnect = Ref();
+    var state = Ref();
+
+    $.IOServiceOpen(
+        $.IOServiceGetMatchingService(
+            $.kIOMasterPortDefault,
+            $.IOServiceMatching(
+                $.kIOHIDSystemClass
+            )
+        ),
+        $.mach_task_self_,
+        $.kIOHIDParamConnectType,
+        ioConnect
+    );
+    $.IOHIDGetModifierLockState(ioConnect, $.kIOHIDCapsLockState, state);
+    console.log(state[0]);
+    console.log(state);
+    console.log(state[1]);
+    console.log($.kIOHIDCapsLockState);
+    $.IOHIDSetModifierLockState(ioConnect, $.kIOHIDCapsLockState, true);
+    delay(0.05);
+    $.IOHIDSetModifierLockState(ioConnect, $.kIOHIDCapsLockState, false);
+    //if (state[0]) {
+//	$.IOHIDSetModifierLockState(ioConnect, $.kIOHIDCapsLockState, false);
+ //   } else {
+//	$.IOHIDSetModifierLockState(ioConnect, $.kIOHIDCapsLockState, true);
+ //   }
+    $.IOServiceClose(ioConnect);
+})();

