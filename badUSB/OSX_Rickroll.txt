@@ -5,7 +5,6 @@ REM Target:	macOS 11.0+
 REM Version:	1.0
 REM Category:	Prank
 REM Source: https://github.com/nilsstreedain/Ducky-Scripts/
-REM
 REM Open terminal window
 DELAY 1000
 GUI SPACE
